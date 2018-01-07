@@ -10,3 +10,7 @@ glfw = "0.20.0"
 [[bin]]
 name = "1_2_1"
 path = "src/1_getting_started/2_1_hello_triangle.rs"
+
+[[bin]]
+name = "1_2_2"
+path = "src/1_getting_started/2_2_hello_triangle_with_indices.rs"
