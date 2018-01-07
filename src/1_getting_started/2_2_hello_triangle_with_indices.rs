@@ -135,7 +135,7 @@ fn main() {
 
             gl::UseProgram(shader_program);
             gl::BindVertexArray(vao);
-            // gl::DrawArrays(gl::TRIANGLES, 0, 3);
+
             gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, ptr::null());
         }
 

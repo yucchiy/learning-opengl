@@ -26,7 +26,7 @@ const FRAGMENT_SHADER_SOURCE: &str = r#"
     #version 410 core
     out vec4 FragColor;
     void main() {
-       FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+       FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
     }
 "#;
 
@@ -47,7 +47,7 @@ fn main() {
 
     gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
 
-    let (shader_program, vao) = unsafe {
+    let (shader_program, vaos) = unsafe {
         let vertex_shader = gl::CreateShader(gl::VERTEX_SHADER);
         let c_str_vertex = CString::new(VERTEX_SHADER_SOURCE.as_bytes()).unwrap();
         gl::ShaderSource(vertex_shader, 1, &c_str_vertex.as_ptr(), ptr::null());
@@ -86,30 +86,66 @@ fn main() {
         gl::DeleteShader(vertex_shader);
         gl::DeleteShader(fragment_shader);
 
-        let vertices: [f32; 9] = [
-            -0.5, -0.5, 0.0, // left
-             0.5, -0.5, 0.0, // right
-             0.0,  0.5, 0.0  // top
+        let first_vertices: [f32; 9] = [
+            -0.9, -0.5, 0.0,
+            -0.0, -0.5, 0.0,
+            -0.45, 0.5, 0.0,
         ];
-        let (mut vbo, mut vao) = (0, 0);
-        gl::GenVertexArrays(1, &mut vao);
-        gl::GenBuffers(1, &mut vbo);
-        gl::BindVertexArray(vao);
 
-        gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
+        let second_vertices: [f32; 9] = [
+            0.0, -0.5, 0.0,
+            0.9, -0.5, 0.0, 
+            0.45, 0.5, 0.0
+        ];
+
+        let (mut vbos, mut vaos) = ([0, 0], [0, 0]);
+
+        gl::GenVertexArrays(2, vaos.as_mut_ptr());
+        gl::GenBuffers(2, vbos.as_mut_ptr());
+
+        // for first vertices
+        gl::BindVertexArray(vaos[0]);
+
+        gl::BindBuffer(gl::ARRAY_BUFFER, vbos[0]);
         gl::BufferData(gl::ARRAY_BUFFER,
-                       (vertices.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
-                       &vertices[0] as *const f32 as *const c_void,
+                       (first_vertices.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
+                       &first_vertices[0] as *const f32 as *const c_void,
                        gl::STATIC_DRAW);
 
-        gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, 3 * mem::size_of::<GLfloat>() as GLsizei, ptr::null());
+        gl::VertexAttribPointer(
+            0,
+            3,
+            gl::FLOAT,
+            gl::FALSE,
+            3 * mem::size_of::<GLfloat>() as GLsizei,
+            ptr::null()
+        );
         gl::EnableVertexAttribArray(0);
 
-        gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+        // for second vertices
+        gl::BindVertexArray(vaos[1]);
 
+        gl::BindBuffer(gl::ARRAY_BUFFER, vbos[1]);
+        gl::BufferData(gl::ARRAY_BUFFER,
+                       (second_vertices.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
+                       &second_vertices[0] as *const f32 as *const c_void,
+                       gl::STATIC_DRAW);
+
+        gl::VertexAttribPointer(
+            0,
+            3,
+            gl::FLOAT,
+            gl::FALSE,
+            3 * mem::size_of::<GLfloat>() as GLsizei,
+            ptr::null()
+        );
+        gl::EnableVertexAttribArray(0);
+
+        // disable vao & vbo
+        gl::BindBuffer(gl::ARRAY_BUFFER, 0);
         gl::BindVertexArray(0);
 
-        (shader_program, vao)
+        (shader_program, vaos)
     };
 
     while !window.should_close() {
@@ -120,7 +156,10 @@ fn main() {
             gl::Clear(gl::COLOR_BUFFER_BIT);
 
             gl::UseProgram(shader_program);
-            gl::BindVertexArray(vao);
+            gl::BindVertexArray(vaos[0]);
+            gl::DrawArrays(gl::TRIANGLES, 0, 3);
+
+            gl::BindVertexArray(vaos[1]);
             gl::DrawArrays(gl::TRIANGLES, 0, 3);
         }
 
@@ -129,7 +168,7 @@ fn main() {
     }
 }
 
-fn process_events(window: &mut glfw::Window, events: &Receiver<(f63, glfw::WindowEvent)>) {
+fn process_events(window: &mut glfw::Window, events: &Receiver<(f64, glfw::WindowEvent)>) {
     for (_, event) in glfw::flush_messages(events) {
         match event {
             glfw::WindowEvent::FramebufferSize(width, height) => {
@@ -140,3 +179,5 @@ fn process_events(window: &mut glfw::Window, events: &Receiver<(f63, glfw::Windo
         }
     }
 }
+
+

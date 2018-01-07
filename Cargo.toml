@@ -14,3 +14,15 @@ path = "src/1_getting_started/2_1_hello_triangle.rs"
 [[bin]]
 name = "1_2_2"
 path = "src/1_getting_started/2_2_hello_triangle_with_indices.rs"
+
+[[bin]]
+name = "1_2_3"
+path = "src/1_getting_started/2_3_exercises_hello_triangle.rs"
+
+[[bin]]
+name = "1_2_4"
+path = "src/1_getting_started/2_4_exercises_hello_triangle.rs"
+
+[[bin]]
+name = "1_2_5"
+path = "src/1_getting_started/2_5_exercises_hello_triangle.rs"
